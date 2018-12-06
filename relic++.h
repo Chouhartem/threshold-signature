@@ -24,7 +24,9 @@ class G1 {
     return &t;
   }
   void get_ord(Z &n);
-  G1 operator+(G1 a);
+  G1 operator+(G1 &b);
+  G1 operator-(G1 &b);
+  G1 operator-();
   void print();
   bool operator==(G1);
   bool operator!=(G1);
@@ -61,7 +63,10 @@ class Z {
   }
   void rand_mod(Z);
   void print();
-  Z operator+(Z b);
+  Z operator+(Z &b);
+  Z operator*(Z &b);
+  Z operator/(Z &b);
+  Z operator-(Z &b);
   friend void G1::get_ord(Z&);
 };
 

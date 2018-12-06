@@ -5,10 +5,24 @@ extern "C" {
 }
 #include "relic++.h"
 
-G1 G1::operator+(G1 a)
+G1 G1::operator+(G1& b)
 {
   g1_t res;
-  g1_add(res, *a.get(), t);
+  g1_add(res, t, *b.get());
+  return G1(res);
+}
+
+G1 G1::operator-(G1& b)
+{
+  g1_t res;
+  g1_sub(res, t, *b.get());
+  return G1(res);
+}
+
+G1 G1::operator-()
+{
+  g1_t res;
+  g1_neg(res, t);
   return G1(res);
 }
 
@@ -36,10 +50,29 @@ void G1::rand() {
   g1_rand(t);
 }
 
-Z Z::operator+(Z b)
+Z Z::operator+(Z &b)
 {
   Z res;
   bn_add(*res.get(), t, *b.get());
+  return res;
+}
+
+Z Z::operator*(Z &b)
+{
+  Z res;
+  bn_mul(*res.get(), t, *b.get());
+  return res;
+}
+Z Z::operator-(Z &b)
+{
+  Z res;
+  bn_sub(*res.get(), t, *b.get());
+  return res;
+}
+Z Z::operator/(Z &b)
+{
+  Z res;
+  bn_div(*res.get(), t, *b.get());
   return res;
 }
 
