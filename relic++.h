@@ -18,7 +18,8 @@
 #ifndef _H_RELICPP
 #define _H_RELICPP
 #include<ostream>
-/**
+#include<iostream>
+/*
  * @file relic++.h
  * @brief Relic wrapper in c++
  * @author Fabrice Mouhartem
@@ -42,10 +43,13 @@ class G1 {
     g1_null(t);
     g1_new(t);
   }
-  G1(const g1_t a) {
-    g1_new(t);
+  G1(const g1_t a) : G1() {
     g1_copy(t, a);
   }
+  G1(const G1& a) : G1() {
+    g1_copy(t, a.t);
+  }
+  G1(const Z& k);
   ~G1() {
     g1_free(t);
   }
@@ -64,6 +68,7 @@ class G1 {
   void rand();
 
   friend G1 operator*(Z k, G1 g);
+  friend GT pairing(G1 a, G2 b);
 };
 
 /**
@@ -76,10 +81,10 @@ class G2 {
     g2_null(t);
     g2_new(t);
   }
-  G2(g2_t a) {
-    g2_new(t);
+  G2(g2_t a) : G2() {
     g2_copy(t, a);
   }
+  G2(const Z& k);
   ~G2() {
     g2_free(t);
   }
@@ -98,7 +103,37 @@ class G2 {
   void rand();
 
   friend G2 operator*(Z k, G2 g);
+  friend GT pairing(G1 a, G2 b);
 };
+
+/**
+ * @brief Target group elements
+ */
+class GT {
+  gt_t t;
+  public:
+  GT() {
+    gt_null(t);
+    gt_new(t);
+  }
+  GT(gt_t a) {
+    gt_new(t);
+    gt_copy(t, a);
+  }
+  GT(const Z& k);
+  ~GT() {
+    gt_free(t);
+  }
+  void print();
+  GT operator*(GT b);
+  void gen();
+  void operator=(GT a);
+  bool operator==(GT& a);
+  bool operator!=(GT& a);
+  GT operator^(const Z& a);
+};
+
+GT pairing(G1 a, G2 b);
 
 
 /**
@@ -111,16 +146,16 @@ class Z {
     bn_null(t);
     bn_new(t);
   }
-  Z(dig_t n)
+  Z(int n) : Z()
   {
-    bn_null(t);
-    bn_new(t);
+    bn_set_dig(t, (dis_t) n);
+  }
+  Z(dig_t n) : Z()
+  {
     bn_set_dig(t, n);
   }
-  Z(bn_t n)
+  Z(bn_t n) : Z()
   {
-    bn_null(t);
-    bn_new(t);
     bn_copy(t,n);
   }
   ~Z() {
@@ -133,9 +168,19 @@ class Z {
   Z operator*(Z &b);
   Z operator/(Z &b);
   Z operator-(Z &b);
+  bool operator==(Z& b);
+  bool operator<(Z& b);
+  bool operator>(Z& b);
+  bool operator>=(Z& b);
+  bool operator<=(Z& b);
+  void operator=(Z& b);
 
+  friend G1::G1(const Z& k);
+  friend G2::G2(const Z& k);
+  friend GT::GT(const Z& k);
   friend void G1::get_ord(Z&);
   friend void G2::get_ord(Z&);
+  friend GT GT::operator^(const Z& k);
   friend G1 operator*(Z k, G1 g);
   friend G2 operator*(Z k, G2 g);
   friend std::ostream& operator<<(std::ostream &ss, Z z);

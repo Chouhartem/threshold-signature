@@ -8,6 +8,9 @@ extern "C" {
 /******/
 /* G1 */
 /******/
+G1::G1(const Z& k) : G1() {
+  g1_mul_gen(t, k.t);
+}
 G1 G1::operator+(G1 b)
 {
   g1_t res;
@@ -91,6 +94,12 @@ G1 operator*(Z k, G1 g)
 /******/
 /* G2 */
 /******/
+G2::G2(const Z& k) : G2() {
+  bn_t kt;
+  bn_copy(kt, k.t);
+  g2_mul_gen(t, kt);
+}
+
 void G2::get_ord(Z &n)
 {
   g2_get_ord(n.t);
@@ -154,6 +163,68 @@ G2 operator*(Z k, G2 g)
   return res;
 }
 
+void G2::rand()
+{
+  g2_rand(t);
+}
+
+void G2::print()
+{
+  g2_print(t);
+}
+
+/******/
+/* GT */
+/******/
+GT::GT(const Z& k) : GT()
+{
+  bn_t kt;
+  bn_copy(kt, k.t);
+  gt_get_gen(t);
+  gt_exp(t, t, kt);
+}
+
+void GT::print()
+{
+  gt_print(t);
+}
+
+void GT::gen()
+{
+  gt_get_gen(t);
+}
+
+bool GT::operator==(GT& a)
+{
+  return gt_cmp(t, a.t) == CMP_EQ;
+}
+
+bool GT::operator!=(GT& a)
+{
+  return gt_cmp(t, a.t) == CMP_NE;
+}
+
+GT pairing(G1 a, G2 b)
+{
+  gt_t res;
+  pc_map(res, a.t, b.t);
+  return GT(res);
+}
+
+void GT::operator=(GT a)
+{
+  gt_copy(t, a.t);
+}
+
+GT GT::operator^(const Z& k)
+{
+  bn_t kt;
+  bn_copy(kt, k.t);
+  gt_t res;
+  gt_exp(res, t, kt);
+  return GT(res);
+}
+
 /*****/
 /* Z */
 /*****/
@@ -200,4 +271,35 @@ std::ostream& operator<<(std::ostream &ss, Z z)
   bn_write_str(s, n, z.t, 10);
   ss << s;
   return ss;
+}
+
+bool Z::operator==(Z& b)
+{
+  return bn_cmp(t, b.t) == CMP_EQ;
+}
+
+bool Z::operator<(Z& b)
+{
+  return bn_cmp(t, b.t) == CMP_LT;
+}
+
+bool Z::operator>(Z& b)
+{
+  return bn_cmp(t, b.t) == CMP_GT;
+}
+
+bool Z::operator>=(Z& b)
+{
+  int cmp = bn_cmp(t, b.t);
+  return cmp == CMP_GT || cmp == CMP_EQ;
+}
+bool Z::operator<=(Z& b)
+{
+  int cmp = bn_cmp(t, b.t);
+  return cmp == CMP_LT || cmp == CMP_EQ;
+}
+
+void Z::operator=(Z& b)
+{
+  bn_copy(t, b.t);
 }

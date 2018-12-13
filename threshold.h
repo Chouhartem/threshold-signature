@@ -3,11 +3,13 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include "relic++.h"
 
 typedef std::string Msg;
 
 struct Sk {
-  bn_t a1, a2, b1, b2;
+  Z a1, a2, b1, b2;
+  Sk() : a1((dig_t) 0), a2((dig_t) 0), b1((dig_t) 0), b2((dig_t) 0) {}
 };
 
 class Threshold {
