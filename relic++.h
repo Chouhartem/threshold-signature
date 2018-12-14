@@ -32,13 +32,14 @@ class Z;
 class G1;
 class G2;
 class GT;
+class H;
 
 /**
  * @brief Group elements in G1
  */
 class G1 {
-  g1_t t;
   public:
+  g1_t t;
   G1() {
     g1_null(t);
     g1_new(t);
@@ -66,9 +67,11 @@ class G1 {
   bool operator==(G1);
   bool operator!=(G1);
   void rand();
+  void write(uint8_t* res, const int l, const int compressed);
 
   friend G1 operator*(Z k, G1 g);
   friend GT pairing(G1 a, G2 b);
+  friend class H;
 };
 
 /**
@@ -102,6 +105,7 @@ class G2 {
   bool operator!=(G2);
   void rand();
 
+  friend H;
   friend G2 operator*(Z k, G2 g);
   friend GT pairing(G1 a, G2 b);
 };
@@ -131,6 +135,8 @@ class GT {
   bool operator==(GT& a);
   bool operator!=(GT& a);
   GT operator^(const Z& a);
+
+  friend H;
 };
 
 GT pairing(G1 a, G2 b);
@@ -175,15 +181,41 @@ class Z {
   bool operator<=(Z& b);
   void operator=(Z& b);
 
-  friend G1::G1(const Z& k);
-  friend G2::G2(const Z& k);
-  friend GT::GT(const Z& k);
-  friend void G1::get_ord(Z&);
-  friend void G2::get_ord(Z&);
-  friend GT GT::operator^(const Z& k);
+  friend class G1;
+  friend class G2;
+  friend class GT;
+  friend H;
   friend G1 operator*(Z k, G1 g);
   friend G2 operator*(Z k, G2 g);
   friend std::ostream& operator<<(std::ostream &ss, Z z);
+};
+
+/**
+ * @brief Hash functions
+ */
+class H{
+  const unsigned int size = 64;
+  const unsigned int salt_size = 32;
+  uint8_t h[64];
+  uint8_t salt[32];
+  public:
+  H() {
+    for(unsigned int i = 0; i < size; ++i)
+      h[i] = 0;
+    for(unsigned int i = 0; i < salt_size; ++i)
+      salt[i] = 0;
+  }
+  int set_salt(uint8_t* s, unsigned int l);
+  void rand_salt();
+  void print();
+  void compute(uint8_t* buf, int l);
+  void from(const Z& n);
+  void from(const G1& g);
+  void from(G2& g);
+  void from(GT& g);
+  void to(Z& n);
+  void to(G1& g);
+  void to(G2& g);
 };
 
 G1 operator*(Z k, G1 g);
