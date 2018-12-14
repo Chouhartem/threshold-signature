@@ -38,8 +38,8 @@ class H;
  * @brief Group elements in G1
  */
 class G1 {
-  public:
   g1_t t;
+  public:
   G1() {
     g1_null(t);
     g1_new(t);
