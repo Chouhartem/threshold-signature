@@ -7,7 +7,7 @@ CC=g++
 
 all : main
 
-main : main.cpp config.o threshold.o relic++.o
+main : main.cpp config.o threshold.o relic++.o polynomials.o
 	$(CC) $(CFLAGS) -lrelic $^ -o $@
 
 %.o : %.cpp %.h
