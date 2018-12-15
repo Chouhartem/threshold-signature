@@ -99,3 +99,12 @@ bool Polynomial::operator!=(const Polynomial& q) const
 {
   return !(*this == q);
 }
+
+Polynomial operator*(const Z& k, const Polynomial& P)
+{
+  Polynomial res;
+  for(auto x : P.coeffs) {
+    res.coeffs.push_back(k*x);
+  }
+  return res;
+}

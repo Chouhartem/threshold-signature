@@ -37,8 +37,10 @@ class Polynomial
   bool operator==(const Polynomial& q) const;
   bool operator!=(const Polynomial& q) const;
   friend std::ostream& operator<<(std::ostream& os, const Polynomial& p);
+  friend Polynomial operator*(const Z& k, const Polynomial& P);
 };
 
 std::ostream& operator<<(std::ostream& os, const Polynomial& p);
+Polynomial operator*(const Z& k, const Polynomial& P);
 
 #endif
