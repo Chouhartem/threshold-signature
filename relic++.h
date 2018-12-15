@@ -60,14 +60,14 @@ class G1 {
   void set_infty();
   bool is_infty();
   bool valid();
-  G1 operator+(G1 b);
-  G1 operator-(G1 b);
-  G1 operator-();
-  void print();
-  bool operator==(G1);
-  bool operator!=(G1);
+  G1 operator+(const G1& b) const;
+  G1 operator-(const G1& b) const;
+  G1 operator-() const;
+  void print() const;
+  bool operator==(const G1&) const;
+  bool operator!=(const G1&) const;
   void rand();
-  void write(uint8_t* res, const int l, const int compressed);
+  void write(uint8_t* res, const int l, const int compressed) const;
 
   friend G1 operator*(Z k, G1 g);
   friend GT pairing(G1 a, G2 b);
@@ -170,16 +170,17 @@ class Z {
   }
   void rand_mod(Z);
   void print();
-  Z operator+(Z &b);
-  Z operator*(Z &b);
-  Z operator/(Z &b);
-  Z operator-(Z &b);
-  bool operator==(Z& b);
-  bool operator<(Z& b);
-  bool operator>(Z& b);
-  bool operator>=(Z& b);
-  bool operator<=(Z& b);
-  void operator=(Z& b);
+  Z operator+(const Z &b) const;
+  Z operator*(const Z &b) const;
+  Z operator/(const Z &b) const ;
+  Z operator-(const Z &b) const;
+  bool operator==(const Z& b) const;
+  bool operator!=(const Z& b) const;
+  bool operator<(const Z& b) const;
+  bool operator>(const Z& b) const;
+  bool operator>=(const Z& b) const;
+  bool operator<=(const Z& b) const;
+  void operator=(const Z& b);
 
   friend class G1;
   friend class G2;

@@ -12,38 +12,38 @@ extern "C" {
 G1::G1(const Z& k) : G1() {
   g1_mul_gen(t, k.t);
 }
-G1 G1::operator+(G1 b)
+G1 G1::operator+(const G1& b) const
 {
   g1_t res;
   g1_add(res, t, b.t);
   return G1(res);
 }
 
-G1 G1::operator-(G1 b)
+G1 G1::operator-(const G1& b) const
 {
   g1_t res;
   g1_sub(res, t, b.t);
   return G1(res);
 }
 
-G1 G1::operator-()
+G1 G1::operator-() const
 {
   g1_t res;
   g1_neg(res, t);
   return G1(res);
 }
 
-void G1::print()
+void G1::print() const
 {
   g1_print(t);
 }
 
-bool G1::operator==(G1 a)
+bool G1::operator==(const G1& a) const
 {
   return g1_cmp(t, a.t) == CMP_EQ;
 }
 
-bool G1::operator!=(G1 a)
+bool G1::operator!=(const G1& a) const
 {
   return g1_cmp(t, a.t) == CMP_NE;
 }
@@ -84,7 +84,7 @@ void G1::rand() {
   g1_rand(t);
 }
 
-void G1::write(uint8_t* res, const int l, const int compressed)
+void G1::write(uint8_t* res, const int l, const int compressed) const
 {
   g1_write_bin(res, l, t, compressed);
 }
@@ -234,26 +234,26 @@ GT GT::operator^(const Z& k)
 /*****/
 /* Z */
 /*****/
-Z Z::operator+(Z &b)
+Z Z::operator+(const Z &b) const
 {
   Z res;
   bn_add(res.t, t, b.t);
   return res;
 }
 
-Z Z::operator*(Z &b)
+Z Z::operator*(const Z &b) const
 {
   Z res;
   bn_mul(res.t, t, b.t);
   return res;
 }
-Z Z::operator-(Z &b)
+Z Z::operator-(const Z &b) const
 {
   Z res;
   bn_sub(res.t, t, b.t);
   return res;
 }
-Z Z::operator/(Z &b)
+Z Z::operator/(const Z &b) const
 {
   Z res;
   bn_div(res.t, t, b.t);
@@ -279,33 +279,38 @@ std::ostream& operator<<(std::ostream &ss, Z z)
   return ss;
 }
 
-bool Z::operator==(Z& b)
+bool Z::operator==(const Z& b) const
 {
   return bn_cmp(t, b.t) == CMP_EQ;
 }
 
-bool Z::operator<(Z& b)
+bool Z::operator!=(const Z& b) const
+{
+  return bn_cmp(t, b.t) != CMP_EQ;
+}
+
+bool Z::operator<(const Z& b) const
 {
   return bn_cmp(t, b.t) == CMP_LT;
 }
 
-bool Z::operator>(Z& b)
+bool Z::operator>(const Z& b) const
 {
   return bn_cmp(t, b.t) == CMP_GT;
 }
 
-bool Z::operator>=(Z& b)
+bool Z::operator>=(const Z& b) const
 {
   int cmp = bn_cmp(t, b.t);
   return cmp == CMP_GT || cmp == CMP_EQ;
 }
-bool Z::operator<=(Z& b)
+bool Z::operator<=(const Z& b) const
 {
   int cmp = bn_cmp(t, b.t);
   return cmp == CMP_LT || cmp == CMP_EQ;
 }
 
-void Z::operator=(Z& b)
+void Z::operator=(const Z& b)
 {
   bn_copy(t, b.t);
 }
