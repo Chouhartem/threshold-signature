@@ -257,6 +257,9 @@ Z Z::operator/(const Z &b) const
 {
   Z res;
   bn_div(res.t, t, b.t);
+  // -1/1 = -2
+  if (bn_sign(res.t) == BN_NEG)
+    bn_add_dig(res.t, res.t, 1);
   return res;
 }
 
@@ -277,6 +280,19 @@ std::ostream& operator<<(std::ostream &ss, Z z)
   bn_write_str(s, n, z.t, 10);
   ss << s;
   return ss;
+}
+
+Z Z::operator-() const
+{
+  Z res;
+  bn_neg(res.t, t);
+  return res;
+}
+
+Z Z::operator+() const
+{
+  Z res(t);
+  return res;
 }
 
 bool Z::operator==(const Z& b) const
@@ -314,6 +330,17 @@ void Z::operator=(const Z& b)
 {
   bn_copy(t, b.t);
 }
+
+void Z::operator*=(const Z& b)
+{
+  bn_mul(t, t, b.t);
+}
+
+void Z::operator+=(const Z& b)
+{
+  bn_add(t, t, b.t);
+}
+
 
 /******************/
 /* Hash functions */

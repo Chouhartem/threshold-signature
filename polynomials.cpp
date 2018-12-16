@@ -4,6 +4,7 @@ extern "C" {
 #include <relic_bench.h>
 }
 #include<cmath>
+#include<cassert>
 #include "polynomials.h"
 
 std::ostream& operator<<(std::ostream& os, const Polynomial& p)
@@ -14,7 +15,10 @@ std::ostream& operator<<(std::ostream& os, const Polynomial& p)
   }
   unsigned int n = p.coeffs.size();
   for(unsigned int i = n-1; i != 0; --i) {
-    if (i == 1) {
+    if (p.coeffs[i] == 0) {
+      continue;
+    }
+    else if (i == 1) {
       os << p.coeffs[i] << "*X + ";
     }
     else {
@@ -105,6 +109,29 @@ Polynomial operator*(const Z& k, const Polynomial& P)
   Polynomial res;
   for(auto x : P.coeffs) {
     res.coeffs.push_back(k*x);
+  }
+  return res;
+}
+
+Z lagrange_zero(const std::vector<std::pair<Z, Z>>& parts)
+{
+  unsigned int n = parts.size();
+  Z res(0);
+  for(unsigned int i = 0; i < n; ++i) {
+    Z part_num(1);
+    Z part_den(1);
+    Z xi = parts[i].first;
+    Z yi = parts[i].second;
+    for(unsigned int j = 0; j < n; ++j) {
+      if (i == j)
+        continue;
+      Z xj = parts[j].first;
+      assert(xi != xj);
+      part_num *= -xj;
+      part_den *= (xi - xj);
+    }
+    Z part_prod = (yi * part_num) / part_den;
+    res += part_prod;
   }
   return res;
 }

@@ -42,5 +42,6 @@ class Polynomial
 
 std::ostream& operator<<(std::ostream& os, const Polynomial& p);
 Polynomial operator*(const Z& k, const Polynomial& P);
+Z lagrange_zero(const std::vector<std::pair<Z, Z>>& parts);
 
 #endif

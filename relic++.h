@@ -152,15 +152,15 @@ class Z {
     bn_null(t);
     bn_new(t);
   }
-  Z(int n) : Z()
+  Z(const int n) : Z()
   {
     bn_set_dig(t, (dis_t) n);
   }
-  Z(dig_t n) : Z()
+  Z(const dig_t& n) : Z()
   {
     bn_set_dig(t, n);
   }
-  Z(bn_t n) : Z()
+  Z(const bn_t& n) : Z()
   {
     bn_copy(t,n);
   }
@@ -174,6 +174,8 @@ class Z {
   Z operator*(const Z &b) const;
   Z operator/(const Z &b) const ;
   Z operator-(const Z &b) const;
+  Z operator-() const;
+  Z operator+() const;
   bool operator==(const Z& b) const;
   bool operator!=(const Z& b) const;
   bool operator<(const Z& b) const;
@@ -181,6 +183,8 @@ class Z {
   bool operator>=(const Z& b) const;
   bool operator<=(const Z& b) const;
   void operator=(const Z& b);
+  void operator*=(const Z& b);
+  void operator+=(const Z& b);
 
   friend class G1;
   friend class G2;
