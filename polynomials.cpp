@@ -34,6 +34,11 @@ int Polynomial::deg() const
   return coeffs.size() - 1;
 }
 
+const Z& Polynomial::modulus() const
+{
+  return p;
+}
+
 Z& Polynomial::operator[](int i)
 {
   return coeffs[i];
@@ -48,6 +53,19 @@ Z Polynomial::eval(const Z& x)
   {
     res = res + coeffs[i] * eval;
     eval = x * eval;
+  }
+  return res;
+}
+
+Z Polynomial::eval_p(const Z& x)
+{
+  Z res(0);
+  Z eval(1);
+  int d = deg();
+  for(int i = 0; i <= d; ++i)
+  {
+    res = (res + coeffs[i] * eval) % p;
+    eval = (x * eval) % p;
   }
   return res;
 }
@@ -132,6 +150,29 @@ Z lagrange_zero(const std::vector<std::pair<Z, Z>>& parts)
     }
     Z part_prod = (yi * part_num) / part_den;
     res += part_prod;
+  }
+  return res;
+}
+
+Z lagrange_zero_p(const std::vector<std::pair<Z, Z>>& parts, const Z& p)
+{
+  unsigned int n = parts.size();
+  Z res(0);
+  for(unsigned int i = 0; i < n; ++i) {
+    Z part_num(1);
+    Z part_den(1);
+    Z xi = parts[i].first;
+    Z yi = parts[i].second;
+    for(unsigned int j = 0; j < n; ++j) {
+      if (i == j)
+        continue;
+      Z xj = parts[j].first;
+      assert(xi != xj);
+      part_num *= -xj;
+      part_den *= (xi - xj);
+    }
+    Z part_prod = (yi * part_num) / part_den;
+    res = (res + part_prod) % p;
   }
   return res;
 }

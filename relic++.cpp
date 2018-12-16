@@ -263,6 +263,13 @@ Z Z::operator/(const Z &b) const
   return res;
 }
 
+Z Z::operator%(const Z& b) const
+{
+  Z res;
+  bn_mod(res.t, t, b.t);
+  return res;
+}
+
 void Z::print()
 {
   bn_print(t);

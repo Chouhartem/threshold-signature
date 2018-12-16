@@ -170,10 +170,11 @@ class Z {
   }
   void rand_mod(Z);
   void print();
-  Z operator+(const Z &b) const;
-  Z operator*(const Z &b) const;
-  Z operator/(const Z &b) const ;
-  Z operator-(const Z &b) const;
+  Z operator+(const Z& b) const;
+  Z operator*(const Z& b) const;
+  Z operator/(const Z& b) const ;
+  Z operator%(const Z& b) const;
+  Z operator-(const Z& b) const;
   Z operator-() const;
   Z operator+() const;
   bool operator==(const Z& b) const;
