@@ -168,10 +168,10 @@ Z lagrange_zero_p(const std::vector<std::pair<Z, Z>>& parts, const Z& p)
         continue;
       Z xj = parts[j].first;
       assert(xi != xj);
-      part_num *= -xj;
-      part_den *= (xi - xj);
+      part_num = (part_num * -xj) % p;
+      part_den = (part_den * (xi - xj)) % p;
     }
-    Z part_prod = ((yi * part_num) / part_den) % p;
+    Z part_prod = ((yi * part_num) * part_den.inv_mod_p(p)) % p;
     res = (res + part_prod) % p;
   }
   return res;
