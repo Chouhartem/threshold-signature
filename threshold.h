@@ -47,6 +47,15 @@ struct Share {
   }
 };
 
+struct Sig {
+  G1 z, r;
+  Sig()
+  {
+    z.gen();
+    r.gen();
+  }
+};
+
 
 class Player {
   bool disqualified;
@@ -76,14 +85,21 @@ class Player {
   bool recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from);
   bool recv_share(const Share& share, const unsigned int from);
   bool compute_keys();
+  bool sign(const Msg& M) const;
+  bool verify(const Msg& M, const unsigned int from);
 };
 
 class Threshold {
   public:
   Pk pk;
   G2 gz, gr;
+  Z s1, s2;
+  std::vector<Sig> sigma;
   Threshold()
   {
+    H h;
+    s1 = h.rand_salt();
+    s2 = h.rand_salt();
     pk.g[0].set_infty();
     pk.g[1].set_infty();
     gz.rand();
@@ -96,7 +112,9 @@ class Threshold {
 
   bool keygen(const unsigned int t, const unsigned int n);
   std::pair<g1_t, g1_t> share_sign(int i, Msg m);
-  bool sign(const Msg& M) const;
+  bool sign(const Msg& M);
+  Sig combine(const Msg& M, std::vector<unsigned int>& S);
+  bool verify(const Msg& M, const Sig& sigma);
 };
 
 #endif

@@ -18,6 +18,7 @@ unsigned int Threshold::init_valids()
 bool Threshold::keygen(const unsigned int t, const unsigned int n)
 {
   players = std::vector<Player>(n, Player(t, n, *this));
+  sigma = std::vector<Sig>(n);
   for(unsigned int i = 0; i < n; ++i) {
     players[i].set_index(i);
   }
@@ -53,9 +54,38 @@ bool Threshold::keygen(const unsigned int t, const unsigned int n)
   return true;
 }
 
-bool Threshold::sign(const Msg& M) const
+bool Threshold::sign(const Msg& M)
 {
+  /* Generate signatures */
+  for(auto i : valids) {
+    if (!players[i].sign(M)) {
+      std::cerr << i << ": error while generating signature for message " << M << std::endl;
+      return false;
+    }
+  }
   return true;
+}
+
+bool Threshold::verify(const Msg& M, const Sig& s)
+{
+  /* Compute hashes of the message */
+  G1 h1, h2;
+  H hash;
+
+  hash.set_salt(s1);
+  hash.from(M);
+  hash.to(h1);
+
+  hash.set_salt(s2);
+  hash.from(M);
+  hash.to(h2);
+  /* Verify */
+  return (
+      pairing(s.z, gz) *
+      pairing(s.r, gr) *
+      pairing(h1, pk.g[0]) *
+      pairing(h2, pk.g[1])
+      ).is_unity();
 }
 
 void Player::dist_keygen_1()
@@ -74,10 +104,11 @@ void Player::dist_keygen_1()
       std::cerr << index << ": Error on broadcast" << std::endl;
   }
   /* Send Share */
-  for(unsigned int i = 0; i < n; ++i) {
-    Share share(to_share, index + 1);
-    if (!system.players[i].recv_share(share, index))
-      std::cerr << index << ": Error on player " << i << std::endl;
+  for(unsigned int j = 0; j < n; ++j) {
+    //Share share(to_share, index + 1);
+    Share share(to_share, j);
+    if (!system.players[j].recv_share(share, index))
+      std::cerr << index << ": Error on player " << j << std::endl;
   }
 }
 
@@ -92,20 +123,17 @@ bool Player::compute_keys()
   }
 
   /* Compute Verification Keys */
-  unsigned int v0 = system.valids[0];
   for(auto vi : system.valids)
   {
-    vk[vi].v1 = W1[v0][0];
-    vk[vi].v2 = W2[v0][0];
+    vk[vi].v1.set_infty();
+    vk[vi].v2.set_infty();
     for(auto vj : system.valids) {
-      Z pow((dig_t) vi);
+      Z pow((dig_t) 1);
       for(unsigned int l = 0; l <= t; ++l)
       {
-        if (vj == v0 && l == 0)
-          continue;
         vk[vi].v1 += pow * W1[vj][l];
         vk[vi].v2 += pow * W2[vj][l];
-        pow *= (dig_t) vi;
+        pow *= (dig_t) (vi);
       }
     }
   }
@@ -130,27 +158,69 @@ bool Player::recv_share(const Share& share, const unsigned int from)
 
   /* Broadcast verification */
   /* W1 */
-  G2 eval_bcast(W1[from][0]);
-  Z i_pow((dig_t)(from+1));
-  for(unsigned int l = 1; l <= t; ++l) {
+  G2 eval_bcast;
+  eval_bcast.set_infty();
+  Z i_pow((dig_t) 1);
+  for(unsigned int l = 0; l <= t; ++l) {
     eval_bcast = eval_bcast + i_pow * W1[from][l];
-    i_pow *= (dig_t)(from + 1);
+    i_pow *= (dig_t)(index);
   }
   if (share.a1 * system.gz + share.b1 * system.gr != eval_bcast)
     return false;
 
   /* W2 */
-  eval_bcast = W2[from][0];
-  i_pow = (dig_t)(from+1);
-  for(unsigned int l = 1; l <= t; ++l) {
+  eval_bcast.set_infty();
+  i_pow = (dig_t) 1;
+  for(unsigned int l = 0; l <= t; ++l) {
     eval_bcast = eval_bcast + i_pow * W2[from][l];
-    i_pow *= (dig_t)(from + 1);
+    i_pow *= (dig_t)(index);
   }
   if (share.a2 * system.gz + share.b2 * system.gr != eval_bcast) {
     system.players[from].disqualify();
     return false;
   }
   return true;
+}
+
+bool Player::sign(const Msg& M) const
+{
+  /* Compute hashes of the message */
+  G1 h1, h2;
+  H hash;
+
+  hash.set_salt(system.s1);
+  hash.from(M);
+  hash.to(h1);
+
+  hash.set_salt(system.s2);
+  hash.from(M);
+  hash.to(h2);
+
+  /* Generate signature share */
+  system.sigma[index].z = -sk.a1 * h1 - sk.a2 * h2;
+  system.sigma[index].r = -sk.b1 * h1 - sk.b2 * h2;
+  return true;
+}
+
+bool Player::verify(const Msg& M, const unsigned int from)
+{
+  /* Compute hashes of the message */
+  G1 h1, h2;
+  H hash;
+
+  hash.set_salt(system.s1);
+  hash.from(M);
+  hash.to(h1);
+
+  hash.set_salt(system.s2);
+  hash.from(M);
+  hash.to(h2);
+
+  /* Verify */
+  G1 r,z;
+  r = system.sigma[from].r;
+  z = system.sigma[from].z;
+  return (pairing(z, system.gz) * pairing(r, system.gr) * pairing(h1, vk[from].v1) * pairing(h2, vk[from].v2)).is_unity();
 }
 
 void Player::set_index(const int i)
