@@ -19,6 +19,9 @@ bool Threshold::keygen(const unsigned int t, const unsigned int n)
 {
   players = std::vector<Player>(n, Player(t, n, *this));
   sigma = std::vector<Sig>(n);
+  vk = std::vector<Vk>(n);
+  W1 = std::vector<std::vector<G2>>(n);
+  W2 = std::vector<std::vector<G2>>(n);
   for(unsigned int i = 0; i < n; ++i) {
     players[i].set_index(i);
   }
@@ -34,8 +37,8 @@ bool Threshold::keygen(const unsigned int t, const unsigned int n)
   if (pk.g[0].is_infty() && pk.g[1].is_infty()) {
     G2 prod1, prod2;
     for(unsigned int i = 0; i < valids.size(); ++i) {
-      prod1 += players[valids[0]].W1[valids[i]][0];
-      prod2 += players[valids[0]].W2[valids[i]][0];
+      prod1 += W1[valids[i]][0];
+      prod2 += W2[valids[i]][0];
     }
     pk.g[0] = prod1;
     pk.g[1] = prod2;
@@ -49,6 +52,10 @@ bool Threshold::keygen(const unsigned int t, const unsigned int n)
   for(auto i : valids)
     players[i].compute_sk();
   return true;
+
+  /* Compute VKs */
+  for(auto i : valids)
+    compute_vk(i, t);
 }
 
 bool Threshold::sign(const Msg& M)
@@ -134,10 +141,9 @@ void Player::dist_keygen_1()
     w2[i] = to_share.A2[i] * system.gz + to_share.B2[i] * system.gr;
   }
   /* Broadcast */
-  for(unsigned int i = 0; i < n; ++i) {
-    if (!system.players[i].recv_W(w1, w2, index))
-      std::cerr << index << ": Error on broadcast" << std::endl;
-  }
+  if (!system.recv_W(w1, w2, index))
+    std::cerr << index << ": Error on broadcast" << std::endl;
+
   /* Send Share */
   for(unsigned int j = 0; j < n; ++j) {
     Share share(to_share, j+1);
@@ -158,12 +164,12 @@ bool Player::compute_sk()
   return true;
 }
 
-bool Player::compute_vk(const unsigned int i)
+bool Threshold::compute_vk(const unsigned int i, const unsigned int t)
 {
   /* Compute Verification Keys */
   vk[i].v1.set_infty();
   vk[i].v2.set_infty();
-  for(auto vj : system.valids) {
+  for(auto vj : valids) {
     Z pow((dig_t) 1);
     for(unsigned int l = 0; l <= t; ++l)
     {
@@ -175,7 +181,7 @@ bool Player::compute_vk(const unsigned int i)
   return true;
 }
 
-bool Player::recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from)
+bool Threshold::recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from)
 {
   if ((unsigned int)from > W1.size() || !W1[from].empty() || from > W2.size() || !W2[from].empty())
     return false;
@@ -197,7 +203,7 @@ bool Player::recv_share(const Share& share, const unsigned int from)
   eval_bcast.set_infty();
   Z i_pow((dig_t) 1);
   for(unsigned int l = 0; l <= t; ++l) {
-    eval_bcast = eval_bcast + i_pow * W1[from][l];
+    eval_bcast = eval_bcast + i_pow * system.W1[from][l];
     i_pow *= (dig_t)(index+1);
   }
   if (share.a1 * system.gz + share.b1 * system.gr != eval_bcast)
@@ -207,7 +213,7 @@ bool Player::recv_share(const Share& share, const unsigned int from)
   eval_bcast.set_infty();
   i_pow = (dig_t) 1;
   for(unsigned int l = 0; l <= t; ++l) {
-    eval_bcast = eval_bcast + i_pow * W2[from][l];
+    eval_bcast = eval_bcast + i_pow * system.W2[from][l];
     i_pow *= (dig_t)(index+1);
   }
   if (share.a2 * system.gz + share.b2 * system.gr != eval_bcast) {
@@ -257,8 +263,8 @@ bool Player::verify(const Msg& M, const unsigned int from)
   z = system.sigma[from].z;
   return (pairing(z, system.gz) *
       pairing(r, system.gr) *
-      pairing(h1, vk[from].v1) *
-      pairing(h2, vk[from].v2)).is_unity();
+      pairing(h1, system.vk[from].v1) *
+      pairing(h2, system.vk[from].v2)).is_unity();
 }
 
 void Player::set_index(const int i)

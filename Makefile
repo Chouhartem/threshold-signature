@@ -2,7 +2,7 @@ DBGFLAGS=-ggdb3
 PREFIX=/usr
 INCLUDES_RELIC=$(PREFIX)/include/relic
 LIB_RELIC=$(PREFIX)/lib
-CFLAGS=-I $(INCLUDES_RELIC) -L $(LIB_RELIC) -W -Wall -pg
+CFLAGS=-I $(INCLUDES_RELIC) -L $(LIB_RELIC) -W -Wall -O3
 CC=g++
 
 all : main

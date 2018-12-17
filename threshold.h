@@ -56,46 +56,14 @@ struct Sig {
   }
 };
 
-
-class Player {
-  bool disqualified;
-  unsigned int index;
-  Sk sk;
-  std::vector<Share> shares;
-  public:
-  std::vector<std::vector<G2>> W1;
-  std::vector<std::vector<G2>> W2;
-  Threshold& system;
-  std::vector<Vk> vk;
-  unsigned int n;
-  unsigned int t;
-  Player(const unsigned int tt, const unsigned int nn, Threshold& sys) :disqualified(false), index(0), system(sys)
-  {
-    t = tt;
-    n = nn;
-    vk = std::vector<Vk>(n);
-    shares = std::vector<Share>(n);
-    W1 = std::vector<std::vector<G2>>(n);
-    W2 = std::vector<std::vector<G2>>(n);
-  }
-  void disqualify();
-  bool is_valid() const;
-  void set_index(const int i);
-  void dist_keygen_1();
-  bool recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from);
-  bool recv_share(const Share& share, const unsigned int from);
-  bool compute_vk(const unsigned int i);
-  bool compute_sk();
-  bool sign(const Msg& M) const;
-  bool verify(const Msg& M, const unsigned int from);
-};
-
 class Threshold {
   public:
   Pk pk;
   G2 gz, gr;
   Z s1, s2;
   std::vector<Vk> vk;
+  std::vector<std::vector<G2>> W1;
+  std::vector<std::vector<G2>> W2;
   std::vector<Sig> sigma;
   Threshold()
   {
@@ -112,11 +80,40 @@ class Threshold {
 
   unsigned int init_valids();
 
+  bool recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from);
+  bool compute_vk(const unsigned int i, const unsigned int t);
+
   bool keygen(const unsigned int t, const unsigned int n);
   std::pair<g1_t, g1_t> share_sign(int i, Msg m);
   bool sign(const Msg& M);
   Sig combine(const Msg& M, std::vector<unsigned int>& S);
   bool verify(const Msg& M, const Sig& sigma);
 };
+
+class Player {
+  bool disqualified;
+  unsigned int index;
+  Sk sk;
+  std::vector<Share> shares;
+  public:
+  Threshold& system;
+  unsigned int n;
+  unsigned int t;
+  Player(const unsigned int tt, const unsigned int nn, Threshold& sys) :disqualified(false), index(0), system(sys)
+  {
+    t = tt;
+    n = nn;
+    shares = std::vector<Share>(n);
+  }
+  void disqualify();
+  bool is_valid() const;
+  void set_index(const int i);
+  void dist_keygen_1();
+  bool recv_share(const Share& share, const unsigned int from);
+  bool compute_sk();
+  bool sign(const Msg& M) const;
+  bool verify(const Msg& M, const unsigned int from);
+};
+
 
 #endif
