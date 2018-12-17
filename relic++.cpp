@@ -25,6 +25,11 @@ G1 G1::operator+(const G1& b) const
   return G1(res);
 }
 
+void G1::operator+=(const G1& b)
+{
+  g1_add(t, t, b.t);
+}
+
 G1 G1::operator-(const G1& b) const
 {
   g1_t res;
@@ -276,6 +281,14 @@ Z Z::operator*(const Z &b) const
   bn_mul(res.t, t, b.t);
   return res;
 }
+
+Z Z::operator*(const unsigned int b) const
+{
+  Z res;
+  bn_mul_dig(res.t, t, b);
+  return res;
+}
+
 Z Z::operator-(const Z &b) const
 {
   Z res;
@@ -385,6 +398,18 @@ void Z::operator*=(const Z& b)
 void Z::operator+=(const Z& b)
 {
   bn_add(t, t, b.t);
+}
+
+Z Z::inv_mod_p(const Z& p) const
+{
+  Z a;
+  bn_t b, d;
+  bn_null(b); bn_null(d);
+  bn_new(b); bn_new(d);
+  bn_gcd_ext(d, a.t, b, t, p.t);
+  bn_free(b); bn_free(d);
+  bn_mod(a.t, a.t, p.t);
+  return a;
 }
 
 

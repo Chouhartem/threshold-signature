@@ -47,8 +47,9 @@ class G1 {
   G1 operator-(const G1& b) const;
   G1 operator-() const;
   void print() const;
-  bool operator==(const G1&) const;
-  bool operator!=(const G1&) const;
+  bool operator==(const G1& b) const;
+  bool operator!=(const G1& b) const;
+  void operator+=(const G1& b);
   void rand();
   void write(uint8_t* res, const int l, const int compressed) const;
 
@@ -163,11 +164,13 @@ class Z {
   unsigned int size_bin() const;
   Z operator+(const Z& b) const;
   Z operator*(const Z& b) const;
+  Z operator*(const unsigned int b) const;
   Z operator/(const Z& b) const ;
   Z operator%(const Z& b) const;
   Z operator-(const Z& b) const;
   Z operator-() const;
   Z operator+() const;
+  Z inv_mod_p(const Z& p) const;
   bool operator==(const Z& b) const;
   bool operator!=(const Z& b) const;
   bool operator<(const Z& b) const;
