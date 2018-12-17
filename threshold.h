@@ -21,7 +21,12 @@ struct Sk {
 };
 
 struct Vk {
-  G2 v[2];
+  G2 v1, v2;
+  Vk()
+  {
+    v1.gen();
+    v2.gen();
+  }
 };
 
 struct To_Share {
@@ -47,11 +52,11 @@ class Player {
   bool disqualified;
   unsigned int index;
   Sk sk;
-  Vk vk;
+  std::vector<Vk> vk;
   std::vector<Share> shares;
+  public:
   std::vector<std::vector<G2>> W1;
   std::vector<std::vector<G2>> W2;
-  public:
   Threshold& system;
   unsigned int n;
   unsigned int t;
@@ -59,27 +64,39 @@ class Player {
   {
     t = tt;
     n = nn;
+    vk = std::vector<Vk>(n);
     shares = std::vector<Share>(n);
     W1 = std::vector<std::vector<G2>>(n);
     W2 = std::vector<std::vector<G2>>(n);
   }
+  void disqualify();
+  bool is_valid() const;
   void set_index(const int i);
   void dist_keygen_1();
   bool recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from);
   bool recv_share(const Share& share, const unsigned int from);
+  bool compute_keys();
 };
 
 class Threshold {
   public:
+  Pk pk;
   G2 gz, gr;
   Threshold()
   {
+    pk.g[0].set_infty();
+    pk.g[1].set_infty();
     gz.rand();
     gr.rand();
   }
   std::vector<Player> players;
+  std::vector<unsigned int> valids;
+
+  unsigned int init_valids();
+
   bool keygen(const unsigned int t, const unsigned int n);
   std::pair<g1_t, g1_t> share_sign(int i, Msg m);
+  bool sign(const Msg& M) const;
 };
 
 #endif
