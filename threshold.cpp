@@ -51,11 +51,11 @@ bool Threshold::keygen(const unsigned int t, const unsigned int n)
   /* Compute SKs */
   for(auto i : valids)
     players[i].compute_sk();
-  return true;
 
   /* Compute VKs */
   for(auto i : valids)
     compute_vk(i, t);
+  return true;
 }
 
 bool Threshold::sign(const Msg& M)

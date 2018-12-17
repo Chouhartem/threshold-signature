@@ -25,6 +25,8 @@ int main(int argc, char** argv)
     std::cout << "Message to be signed: " << m << std::endl;
     BENCH_SMALL("Distributed signature",system.sign(m));
     std::vector<unsigned int> S;
+    for(unsigned int i = 0; i <= t; ++i)
+      S.push_back(i);
     Sig s;
     BENCH_SMALL("Combination :", s = system.combine(m, S));
     bool res;
