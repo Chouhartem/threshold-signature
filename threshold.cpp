@@ -69,7 +69,7 @@ bool Threshold::sign(const Msg& M)
 Sig Threshold::combine(const Msg& M, std::vector<unsigned int>& S)
 {
   Sig s;
-  if (S.size() < players[0].t) {
+  if (S.size() <= players[0].t) {
     std::cerr << "Not enough users to perform Lagrange reconstruction" << std::endl;
     return s;
   }
