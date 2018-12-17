@@ -4,7 +4,7 @@ This is a proof of concept implementation of the practical signature from [Born 
 
 This C++ implementation relies on the [Relic](https://github.com/relic-toolkit) toolkit from Diego Aranha.
 
-**Usage:** ./main t n Msg
+**Usage:** `./main t n Msg`
 
 * `t` is the minimum number of users needed for the reconstruction
 * `n` the total number of users
