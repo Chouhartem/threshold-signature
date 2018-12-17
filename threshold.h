@@ -51,8 +51,8 @@ struct Sig {
   G1 z, r;
   Sig()
   {
-    z.gen();
-    r.gen();
+    z.set_infty();
+    r.set_infty();
   }
 };
 
