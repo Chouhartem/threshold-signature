@@ -8,6 +8,9 @@
 
 typedef std::string Msg;
 
+class Player;
+class Threshold;
+
 struct Pk {
   G2 g[2];
 };
@@ -21,19 +24,62 @@ struct Vk {
   G2 v[2];
 };
 
+struct To_Share {
+  Polynomial A1, A2, B1, B2;
+  To_Share() : A1(), A2(), B1(), B2() {}
+  To_Share(const unsigned int d) : A1(d), A2(d), B1(d), B2(d) {}
+};
+
+struct Share {
+  Z a1, a2, b1, b2;
+  Share() {}
+  Share(const To_Share& S, const unsigned int& i)
+  {
+    a1 = S.A1.eval_p(Z((dig_t) i));
+    a2 = S.A2.eval_p(Z((dig_t) i));
+    b1 = S.B1.eval_p(Z((dig_t) i));
+    b2 = S.B2.eval_p(Z((dig_t) i));
+  }
+};
+
+
 class Player {
-  private:
-    Sk sk;
-    Vk vk;
+  bool disqualified;
+  unsigned int index;
+  Sk sk;
+  Vk vk;
+  std::vector<Share> shares;
+  std::vector<std::vector<G2>> W1;
+  std::vector<std::vector<G2>> W2;
   public:
+  Threshold& system;
+  unsigned int n;
+  unsigned int t;
+  Player(const unsigned int tt, const unsigned int nn, Threshold& sys) :disqualified(false), index(0), system(sys)
+  {
+    t = tt;
+    n = nn;
+    shares = std::vector<Share>(n);
+    W1 = std::vector<std::vector<G2>>(n);
+    W2 = std::vector<std::vector<G2>>(n);
+  }
+  void set_index(const int i);
+  void dist_keygen_1();
+  bool recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from);
+  bool recv_share(const Share& share, const unsigned int from);
 };
 
 class Threshold {
   public:
-    bool keygen(unsigned int t, unsigned int n);
-    std::pair<g1_t, g1_t> share_sign(int i, Msg m);
-  private:
-    std::vector<Player> p;
+  G2 gz, gr;
+  Threshold()
+  {
+    gz.rand();
+    gr.rand();
+  }
+  std::vector<Player> players;
+  bool keygen(const unsigned int t, const unsigned int n);
+  std::pair<g1_t, g1_t> share_sign(int i, Msg m);
 };
 
 #endif

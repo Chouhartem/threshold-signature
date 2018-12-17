@@ -1,3 +1,9 @@
+/**
+ * @file relic++.cpp
+ * @brief Relic wrappen in C++
+ * @author Fabrice Mouhartem
+ * @date 2018-12-16
+ */
 extern "C" {
 #include <relic.h>
 #include <relic_test.h>
@@ -138,6 +144,12 @@ bool G2::valid()
   return g2_is_valid(t);
 }
 
+G2 G2::operator+(G2 b)
+{
+  G2 res;
+  g2_add(res.t, t, b.t);
+  return res;
+}
 G2 G2::operator-(G2 b)
 {
   g2_t res;

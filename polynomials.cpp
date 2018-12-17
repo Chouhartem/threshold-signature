@@ -44,7 +44,7 @@ Z& Polynomial::operator[](int i)
   return coeffs[i];
 }
 
-Z Polynomial::eval(const Z& x)
+Z Polynomial::eval(const Z& x) const
 {
   Z res(0);
   Z eval(1);
@@ -57,7 +57,7 @@ Z Polynomial::eval(const Z& x)
   return res;
 }
 
-Z Polynomial::eval_p(const Z& x)
+Z Polynomial::eval_p(const Z& x) const
 {
   Z res(0);
   Z eval(1);
@@ -171,7 +171,7 @@ Z lagrange_zero_p(const std::vector<std::pair<Z, Z>>& parts, const Z& p)
       part_num *= -xj;
       part_den *= (xi - xj);
     }
-    Z part_prod = (yi * part_num) / part_den;
+    Z part_prod = ((yi * part_num) / part_den) % p;
     res = (res + part_prod) % p;
   }
   return res;

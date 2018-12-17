@@ -32,8 +32,8 @@ class Polynomial
   }
   const Z& modulus() const;
   int deg() const;
-  Z eval(const Z& x);
-  Z eval_p(const Z& x);
+  Z eval(const Z& x) const;
+  Z eval_p(const Z& x) const;
   void print();
   Polynomial operator+(const Polynomial& q) const;
   Z& operator[](int i);
