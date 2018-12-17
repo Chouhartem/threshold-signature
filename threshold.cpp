@@ -44,13 +44,10 @@ bool Threshold::keygen(const unsigned int t, const unsigned int n)
     std::cerr << "PK is already initialized" << std::endl;
     return false;
   }
-  // Compute VKs and PKs
-  for(auto i : valids) {
-    if(!players[i].compute_keys()){
-      std::cerr << i << ": Error in the computation of VK or SK" << std::endl;
-      return false;
-    }
-  }
+
+  /* Compute SKs */
+  for(auto i : valids)
+    players[i].compute_sk();
   return true;
 }
 
@@ -149,7 +146,7 @@ void Player::dist_keygen_1()
   }
 }
 
-bool Player::compute_keys()
+bool Player::compute_sk()
 {
   /* Compute user's private key */
   for(auto i : system.valids) {
@@ -158,20 +155,21 @@ bool Player::compute_keys()
     sk.b1 += shares[i].b1;
     sk.b2 += shares[i].b2;
   }
+  return true;
+}
 
+bool Player::compute_vk(const unsigned int i)
+{
   /* Compute Verification Keys */
-  for(auto vi : system.valids)
-  {
-    vk[vi].v1.set_infty();
-    vk[vi].v2.set_infty();
-    for(auto vj : system.valids) {
-      Z pow((dig_t) 1);
-      for(unsigned int l = 0; l <= t; ++l)
-      {
-        vk[vi].v1 += pow * W1[vj][l];
-        vk[vi].v2 += pow * W2[vj][l];
-        pow *= (dig_t) (vi+1);
-      }
+  vk[i].v1.set_infty();
+  vk[i].v2.set_infty();
+  for(auto vj : system.valids) {
+    Z pow((dig_t) 1);
+    for(unsigned int l = 0; l <= t; ++l)
+    {
+      vk[i].v1 += pow * W1[vj][l];
+      vk[i].v2 += pow * W2[vj][l];
+      pow *= (dig_t) (i+1);
     }
   }
   return true;

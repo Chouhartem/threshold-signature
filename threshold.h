@@ -61,12 +61,12 @@ class Player {
   bool disqualified;
   unsigned int index;
   Sk sk;
-  std::vector<Vk> vk;
   std::vector<Share> shares;
   public:
   std::vector<std::vector<G2>> W1;
   std::vector<std::vector<G2>> W2;
   Threshold& system;
+  std::vector<Vk> vk;
   unsigned int n;
   unsigned int t;
   Player(const unsigned int tt, const unsigned int nn, Threshold& sys) :disqualified(false), index(0), system(sys)
@@ -84,7 +84,8 @@ class Player {
   void dist_keygen_1();
   bool recv_W(const std::vector<G2>& w1, const std::vector<G2>& w2, const unsigned int from);
   bool recv_share(const Share& share, const unsigned int from);
-  bool compute_keys();
+  bool compute_vk(const unsigned int i);
+  bool compute_sk();
   bool sign(const Msg& M) const;
   bool verify(const Msg& M, const unsigned int from);
 };
@@ -94,6 +95,7 @@ class Threshold {
   Pk pk;
   G2 gz, gr;
   Z s1, s2;
+  std::vector<Vk> vk;
   std::vector<Sig> sigma;
   Threshold()
   {
