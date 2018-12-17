@@ -85,6 +85,7 @@ class G2 {
   void print();
   bool operator==(G2);
   bool operator!=(G2);
+  void operator+=(G2);
   void rand();
 
   friend H;
@@ -151,7 +152,8 @@ class Z {
     bn_free(t);
   }
   void rand_mod(Z);
-  void print();
+  void print() const;
+  bool is_zero() const;
   Z operator+(const Z& b) const;
   Z operator*(const Z& b) const;
   Z operator/(const Z& b) const ;

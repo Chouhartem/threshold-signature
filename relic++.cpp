@@ -181,6 +181,11 @@ G2 operator*(Z k, G2 g)
   return res;
 }
 
+void G2::operator+=(G2 b)
+{
+  g2_add(t, t, b.t);
+}
+
 void G2::rand()
 {
   g2_rand(t);
@@ -282,9 +287,14 @@ Z Z::operator%(const Z& b) const
   return res;
 }
 
-void Z::print()
+void Z::print() const
 {
   bn_print(t);
+}
+
+bool Z::is_zero() const
+{
+  return bn_is_zero(t);
 }
 
 void Z::rand_mod(Z n)
@@ -444,3 +454,4 @@ void H::to(G2& g)
 {
   g2_map(g.t, h, size);
 }
+
