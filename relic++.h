@@ -25,6 +25,7 @@ class G1 {
   G1() {
     g1_null(t);
     g1_new(t);
+    g1_set_infty(t);
   }
   G1(const g1_t a) : G1() {
     g1_copy(t, a);
@@ -65,6 +66,7 @@ class G2 {
   G2() {
     g2_null(t);
     g2_new(t);
+    g2_set_infty(t);
   }
   G2(g2_t a) : G2() {
     g2_copy(t, a);
@@ -102,8 +104,10 @@ class GT {
   GT() {
     gt_null(t);
     gt_new(t);
+    gt_set_unity(t);
   }
   GT(gt_t a) {
+    gt_null();
     gt_new(t);
     gt_copy(t, a);
   }
@@ -112,6 +116,7 @@ class GT {
     gt_free(t);
   }
   void print();
+  bool is_unity();
   GT operator*(GT b);
   void gen();
   void operator=(GT a);
@@ -134,6 +139,7 @@ class Z {
   Z() {
     bn_null(t);
     bn_new(t);
+    bn_zero(t);
   }
   Z(const int n) : Z()
   {
@@ -154,6 +160,7 @@ class Z {
   void rand_mod(Z);
   void print() const;
   bool is_zero() const;
+  unsigned int size_bin() const;
   Z operator+(const Z& b) const;
   Z operator*(const Z& b) const;
   Z operator/(const Z& b) const ;
@@ -196,15 +203,17 @@ class H{
       salt[i] = 0;
   }
   int set_salt(uint8_t* s, unsigned int l);
-  void rand_salt();
+  int set_salt(const Z&);
+  Z rand_salt();
   void print();
   void compute(uint8_t* buf, int l);
+  void from(const std::string& s);
   void from(const Z& n);
   void from(const G1& g);
   void from(G2& g);
   void from(GT& g);
-  void to(Z& n);
-  void to(G1& g);
+  void to(Z& n) const;
+  void to(G1& g) const;
   void to(G2& g);
 };
 

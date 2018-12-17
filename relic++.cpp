@@ -207,6 +207,11 @@ GT::GT(const Z& k) : GT()
   gt_exp(t, t, kt);
 }
 
+bool GT::is_unity()
+{
+  return gt_is_unity(t);
+}
+
 void GT::print()
 {
   gt_print(t);
@@ -232,6 +237,13 @@ GT pairing(G1 a, G2 b)
   gt_t res;
   pc_map(res, a.t, b.t);
   return GT(res);
+}
+
+GT GT::operator*(GT b)
+{
+  GT res;
+  gt_mul(res.t, t, b.t);
+  return res;
 }
 
 void GT::operator=(GT a)
@@ -285,6 +297,11 @@ Z Z::operator%(const Z& b) const
   Z res;
   bn_mod(res.t, t, b.t);
   return res;
+}
+
+unsigned int Z::size_bin() const
+{
+  return bn_size_bin(t);
 }
 
 void Z::print() const
@@ -394,11 +411,20 @@ int H::set_salt(uint8_t* s, unsigned int l)
   return 0;
 }
 
-void H::rand_salt()
+int H::set_salt(const Z& n)
+{
+  if (n.size_bin() > salt_size)
+    return 1;
+  bn_write_bin(salt, salt_size, n.t);
+  return 0;
+}
+
+Z H::rand_salt()
 {
   bn_t n;
   bn_rand(n, BN_POS, 8 * salt_size);
   bn_write_bin(salt, salt_size, n);
+  return n;
 }
 
 void H::print()
@@ -440,12 +466,22 @@ void H::from(GT& g)
   compute(buf, l);
 }
 
-void H::to(Z& n)
+void H::from(const std::string& s)
+{
+  const unsigned int l = s.size();
+  uint8_t buf[l];
+  const char* m = s.c_str();
+  for(unsigned int i = 0; i < l; ++i)
+    buf[i] = m[i];
+  compute(buf, l);
+}
+
+void H::to(Z& n) const
 {
   bn_read_bin(n.t, h, size);
 }
 
-void H::to(G1& g)
+void H::to(G1& g) const
 {
   g1_map(g.t, h, size);
 }
